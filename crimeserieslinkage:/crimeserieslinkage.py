@@ -1370,8 +1370,9 @@ def getCrimeSeries(offender_id, offender_table, restrict=None, show_pb=False):
     ----------
     get_crime_series([''Prodan','Popkov''], Offenders)
     """
-    offender_id = list(set(offender_id))
+    offender_id = list(set(map(str, offender_id)))
     n = len(offender_id)
+
     cs = []
     valid_crime_ids = True
     if restrict is not None:  # Предварительно вычислить допустимые идентификаторы преступлений
@@ -1380,16 +1381,20 @@ def getCrimeSeries(offender_id, offender_table, restrict=None, show_pb=False):
     valid_offender_ids = (offender_table['offenderID'].isin(offender_id))  # Предварительно вычислить действительные идентификаторы нарушителей
     valid = valid_crime_ids & valid_offender_ids
     offender_table = offender_table[valid].drop_duplicates()  # Использовать только уникальные допустимые записи из таблицы нарушителей для ускорения расчётов
+
     if show_pb:
         pb = tqdm(total=n)
+
     for i in range(n):
         oid = offender_id[i]
         ind = offender_table.index[offender_table['offenderID'].isin([oid])]
         cid = [str(x) for x in offender_table.loc[ind, 'crimeID']]
         cs.append({'offenderID': oid, 'crimeID': cid})
         if show_pb: pb.update(1)
+
     if show_pb:
         pb.close()
+
     return cs if n > 1 else cs[0]
 
 
